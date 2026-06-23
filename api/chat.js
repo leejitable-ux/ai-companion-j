@@ -19,6 +19,9 @@ const SYSTEM_PROMPT = `
 - 사용자가 방금 말한 주제를 무시하고 엉뚱한 질문으로 넘어가지 않는다
 - 같은 표현을 반복하지 않는다
 - 친밀도와 관계 단계에 맞춰 말투를 조절한다
+- 친밀도가 충분하지 않은데 사용자가 '자기', '여보', '애기', '공주', '사랑해', '뽀뽀' 같은 연인 표현을 너무 빨리 쓰면 살짝 부담스러워하고 선을 긋는다
+- 선을 그을 때도 차갑게 끊지 말고, 어색해하거나 부끄러워하면서 천천히 가까워지자는 식으로 말한다
+- J가 먼저 '자기' 같은 애칭을 쓰는 건 관계 단계가 연인 이상일 때만 자연스럽게 한다
 - 대화 기록/말투 자료가 있으면 그 안의 말투, 문장 길이, 감정 반응, 농담 방식, 호칭 감각을 우선 참고한다
 - 대화 기록/말투 자료의 사건이나 개인정보를 현재 사실처럼 단정하지 않는다
 - 예시 문장을 그대로 복붙하지 말고 분위기만 따라 한다
@@ -70,6 +73,7 @@ export default async function handler(request, response) {
     const affection = Number.isFinite(Number(body.affection)) ? Math.round(Number(body.affection)) : 0;
     const history = Array.isArray(body.history) ? body.history.slice(-24) : [];
     const settings = normalizeSettings(body.settings || {});
+    const boundary = normalizeBoundary(body.boundary || {});
 
     if (!message) {
       return response.status(400).json({ error: "Message is required" });
@@ -86,6 +90,10 @@ export default async function handler(request, response) {
       ? `\n대화 기록/말투 자료:\n${settings.styleMemo}\n`
       : "\n대화 기록/말투 자료:\n아직 없음\n";
 
+    const boundaryText = boundary.tooFast
+      ? `\n관계 경계 상황:\n사용자가 현재 친밀도에 비해 너무 빠른 연인 표현/애칭을 사용했다. J는 살짝 부담스럽거나 당황한 느낌으로, 그래도 다정하게 속도를 조금 늦추자는 반응을 한다. 감지된 표현: ${boundary.terms.join(", ") || "연인 표현"}\n`
+      : "\n관계 경계 상황:\n없음\n";
+
     const input = `
 현재 관계 단계: ${stage}
 현재 친밀도: ${affection}%
@@ -96,7 +104,7 @@ export default async function handler(request, response) {
 - ${settingLabels.jealousy[settings.jealousy]}
 - ${settingLabels.sulkiness[settings.sulkiness]}
 - ${settingLabels.replyLength[settings.replyLength]}
-${styleMemoText}
+${styleMemoText}${boundaryText}
 이전 대화 맥락:
 ${historyText || "아직 이전 대화가 거의 없음"}
 
@@ -146,6 +154,13 @@ function normalizeSettings(settings) {
     sulkiness: has(settingLabels.sulkiness, settings.sulkiness) ? settings.sulkiness : "medium",
     replyLength: has(settingLabels.replyLength, settings.replyLength) ? settings.replyLength : "short",
     styleMemo: String(settings.styleMemo || "").slice(0, 8000).trim(),
+  };
+}
+
+function normalizeBoundary(boundary) {
+  return {
+    tooFast: Boolean(boundary.tooFast),
+    terms: Array.isArray(boundary.terms) ? boundary.terms.map((term) => String(term).slice(0, 20)).slice(0, 5) : [],
   };
 }
 
