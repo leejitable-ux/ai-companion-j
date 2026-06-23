@@ -49,7 +49,7 @@ render();
 renderProfilePhoto();
 clearOldAppCache();
 
-formEl.addEventListener("submit", (event) => {
+formEl.addEventListener("submit", async (event) => {
   event.preventDefault();
   const text = inputEl.value.trim();
   if (!text) return;
@@ -60,10 +60,14 @@ formEl.addEventListener("submit", (event) => {
   updateAffection(text);
   showTyping();
 
-  window.setTimeout(() => {
+  try {
+    const reply = await createAiReply(text);
     removeTyping();
-    addMessage("j", createReply(text));
-  }, 550 + Math.random() * 650);
+    addMessage("j", reply);
+  } catch (error) {
+    removeTyping();
+    addMessage("j", createFallbackReply(text));
+  }
 });
 
 inputEl.addEventListener("input", autoResizeInput);
@@ -247,7 +251,32 @@ function getUserCallName() {
   return state.affection >= 72 ? character.nicknameAfterLover : character.userName;
 }
 
-function createReply(userText) {
+async function createAiReply(userText) {
+  rememberSimpleFacts(userText);
+
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: userText,
+      stage: getCurrentStage().label,
+      affection: state.affection,
+      history: state.messages.slice(-14),
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.reply) {
+    throw new Error(data.error || "AI reply failed");
+  }
+
+  return String(data.reply).trim();
+}
+
+function createFallbackReply(userText) {
   rememberSimpleFacts(userText);
 
   const stage = getCurrentStage().label;
