@@ -48,6 +48,19 @@
   box-shadow: 0 0 0 4px rgba(74, 174, 232, 0.12);
 }
 
+.launch-mark {
+  background: url("./icon.svg?v=13") center / cover no-repeat !important;
+  color: transparent !important;
+  border-radius: 29px !important;
+  box-shadow: 0 24px 55px rgba(46, 142, 219, 0.26), 0 10px 22px rgba(80, 174, 232, 0.18) !important;
+}
+
+.launch-screen p {
+  color: rgba(44, 92, 126, 0.86) !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.08em !important;
+}
+
 @media (min-width: 420px) {
   .setting-grid {
     grid-template-columns: 1fr 1fr;
