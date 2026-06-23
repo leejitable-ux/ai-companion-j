@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4c7d7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="j" />
+    <title>j - AI Companion</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="chat-card" aria-label="j와의 채팅">
+        <header class="chat-header">
+          <div class="avatar" aria-hidden="true">j</div>
+          <div>
+            <p class="eyebrow">친해진 친구</p>
+            <h1>j</h1>
+          </div>
+          <button class="ghost-button" id="resetButton" type="button">초기화</button>
+        </header>
+
+        <div class="status-panel">
+          <div>
+            <span>관계</span>
+            <strong id="relationshipStage">친해진 친구</strong>
+          </div>
+          <div>
+            <span>친밀도</span>
+            <strong><span id="affectionScore">12</span>%</strong>
+          </div>
+        </div>
+
+        <section class="messages" id="messages" aria-live="polite"></section>
+
+        <form class="composer" id="chatForm">
+          <label class="sr-only" for="messageInput">메시지 입력</label>
+          <textarea
+            id="messageInput"
+            name="message"
+            rows="1"
+            autocomplete="off"
+            placeholder="j에게 메시지 보내기"
+          ></textarea>
+          <button type="submit">전송</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
