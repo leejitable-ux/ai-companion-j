@@ -340,15 +340,9 @@ textarea:focus {
 }
 
 .sheet-card h2 {
-  margin: 0;
+  margin: 0 0 18px;
   font-size: 27px;
   letter-spacing: -0.04em;
-}
-
-.profile-subtitle {
-  margin: 7px 0 18px;
-  color: var(--text-soft);
-  font-size: 14px;
 }
 
 .relationship-card {
@@ -368,6 +362,10 @@ textarea:focus {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.affection-row > div {
+  min-width: 0;
 }
 
 .relationship-row {
@@ -393,14 +391,27 @@ textarea:focus {
 }
 
 .affection-percent {
-  min-width: 46px;
+  min-width: 54px;
+  flex: 0 0 auto;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
   background: var(--skin-primary-soft);
   color: var(--skin-primary-strong) !important;
-  padding: 6px 9px;
+  padding: 6px 10px;
   text-align: center;
   font-size: 13px !important;
   font-weight: 800 !important;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.affection-percent span {
+  display: inline !important;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .affection-track {
