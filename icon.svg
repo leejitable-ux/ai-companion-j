@@ -1,11 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="J app icon">
   <defs>
-    <linearGradient id="bg" x1="88" x2="424" y1="64" y2="448" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ffc1d4"/>
-      <stop offset="1" stop-color="#d85f8e"/>
+    <linearGradient id="bg" x1="166" x2="858" y1="78" y2="934" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EAFBFF"/>
+      <stop offset="0.42" stop-color="#8FD9FF"/>
+      <stop offset="1" stop-color="#2B8EDB"/>
     </linearGradient>
+    <radialGradient id="shine" cx="31%" cy="18%" r="74%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.96"/>
+      <stop offset="0.45" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="jFill" x1="334" x2="696" y1="166" y2="846" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF8FF"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#1268A6" flood-opacity="0.28"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#FFFFFF" flood-opacity="0.45"/>
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
-  <circle cx="360" cy="150" r="36" fill="#fff" opacity=".32"/>
-  <path fill="#fff" d="M225 352c-24 0-45-5-63-15-18-11-32-25-42-44l54-31c10 20 25 30 44 30 28 0 42-17 42-52V146h68v97c0 34-9 61-27 80-18 19-43 29-76 29Z"/>
+
+  <rect width="1024" height="1024" rx="236" fill="url(#bg)"/>
+  <rect x="44" y="36" width="936" height="936" rx="216" fill="url(#shine)"/>
+  <path d="M178 260C290 132 479 88 650 148c132 46 224 151 256 279" fill="none" stroke="#FFFFFF" stroke-width="32" stroke-linecap="round" opacity="0.20"/>
+  <circle cx="759" cy="230" r="38" fill="#FFFFFF" opacity="0.34"/>
+  <circle cx="812" cy="301" r="16" fill="#FFFFFF" opacity="0.30"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M353 209h331v118H353V209Z" fill="url(#jFill)" opacity="0.98"/>
+    <path d="M557 209h127v438c0 146-90 238-233 238-110 0-196-53-238-145l103-62c28 57 73 86 134 86 70 0 107-43 107-121V209Z" fill="url(#jFill)"/>
+    <path d="M315 678c30 58 75 87 135 87 70 0 107-43 107-121V209" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" opacity="0.42"/>
+  </g>
+
+  <rect x="18" y="18" width="988" height="988" rx="224" fill="none" stroke="#FFFFFF" stroke-width="10" opacity="0.22"/>
 </svg>
