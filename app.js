@@ -1,14 +1,13 @@
 const STORAGE_KEY = "ai-companion-j-v1";
 const PHOTO_STORAGE_KEY = "ai-companion-j-profile-photo";
+const SETTINGS_STORAGE_KEY = "ai-companion-j-settings";
 
-const character = {
-  name: "J",
-  age: "20대 중반",
-  startRelation: "친해진 친구",
-  userName: "너",
-  nicknameAfterLover: "자기",
-  jealousy: "중",
-  sulkiness: "중",
+const defaultSettings = {
+  tone: "warm",
+  playfulness: "medium",
+  jealousy: "medium",
+  sulkiness: "medium",
+  replyLength: "short",
 };
 
 const relationshipStages = [
@@ -28,6 +27,7 @@ const starterMessages = [
 ];
 
 let state = loadState();
+let settings = loadSettings();
 
 const messagesEl = document.querySelector("#messages");
 const formEl = document.querySelector("#chatForm");
@@ -44,33 +44,25 @@ const avatarImage = document.querySelector("#avatarImage");
 const avatarInitial = document.querySelector("#avatarInitial");
 const profileImage = document.querySelector("#profileImage");
 const profileInitial = document.querySelector("#profileInitial");
+const toneSetting = document.querySelector("#toneSetting");
+const playfulnessSetting = document.querySelector("#playfulnessSetting");
+const jealousySetting = document.querySelector("#jealousySetting");
+const sulkinessSetting = document.querySelector("#sulkinessSetting");
+const replyLengthSetting = document.querySelector("#replyLengthSetting");
 
 render();
 renderProfilePhoto();
+renderSettings();
 clearOldAppCache();
 
-formEl.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const text = inputEl.value.trim();
-  if (!text) return;
-
-  addMessage("user", text);
-  inputEl.value = "";
-  autoResizeInput();
-  updateAffection(text);
-  showTyping();
-
-  try {
-    const reply = await createAiReply(text);
-    removeTyping();
-    addMessage("j", reply);
-  } catch (error) {
-    removeTyping();
-    addMessage("j", `AI 연결 오류: ${error.message || "알 수 없는 오류"}`);
-  }
-});
+formEl.addEventListener("submit", handleSubmit);
 
 inputEl.addEventListener("input", autoResizeInput);
+inputEl.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+  event.preventDefault();
+  formEl.requestSubmit();
+});
 
 resetButton.addEventListener("click", () => {
   const ok = window.confirm("J와의 대화를 처음부터 다시 시작할까?");
@@ -103,6 +95,31 @@ photoInput.addEventListener("change", (event) => {
   reader.readAsDataURL(file);
 });
 
+[toneSetting, playfulnessSetting, jealousySetting, sulkinessSetting, replyLengthSetting].forEach((select) => {
+  select.addEventListener("change", saveSettingsFromForm);
+});
+
+async function handleSubmit(event) {
+  event.preventDefault();
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  addMessage("user", text);
+  inputEl.value = "";
+  autoResizeInput();
+  updateAffection(text);
+  showTyping();
+
+  try {
+    const reply = await createAiReply(text);
+    removeTyping();
+    addMessage("j", reply);
+  } catch (error) {
+    removeTyping();
+    addMessage("j", `AI 연결 오류: ${error.message || "알 수 없는 오류"}`);
+  }
+}
+
 function createInitialState() {
   return {
     messages: starterMessages,
@@ -128,8 +145,42 @@ function loadState() {
   }
 }
 
+function loadSettings() {
+  const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+  if (!raw) return { ...defaultSettings };
+
+  try {
+    return { ...defaultSettings, ...JSON.parse(raw) };
+  } catch {
+    return { ...defaultSettings };
+  }
+}
+
 function saveState() {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function saveSettings() {
+  window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+}
+
+function saveSettingsFromForm() {
+  settings = {
+    tone: toneSetting.value,
+    playfulness: playfulnessSetting.value,
+    jealousy: jealousySetting.value,
+    sulkiness: sulkinessSetting.value,
+    replyLength: replyLengthSetting.value,
+  };
+  saveSettings();
+}
+
+function renderSettings() {
+  toneSetting.value = settings.tone;
+  playfulnessSetting.value = settings.playfulness;
+  jealousySetting.value = settings.jealousy;
+  sulkinessSetting.value = settings.sulkiness;
+  replyLengthSetting.value = settings.replyLength;
 }
 
 function render() {
@@ -259,6 +310,7 @@ async function createAiReply(userText) {
       message: userText,
       stage: getCurrentStage().label,
       affection: state.affection,
+      settings,
       history: state.messages.slice(-14),
     }),
   });
