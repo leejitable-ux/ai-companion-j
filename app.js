@@ -36,7 +36,7 @@ const affectionEl = document.querySelector("#affectionScore");
 const resetButton = document.querySelector("#resetButton");
 
 render();
-registerServiceWorker();
+clearOldAppCache();
 
 formEl.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -274,7 +274,16 @@ function pick(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
-  navigator.serviceWorker.register("./sw.js").catch(() => {});
+function clearOldAppCache() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations?.().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
+    });
+  }
+
+  if ("caches" in window) {
+    caches.keys().then((keys) => {
+      keys.forEach((key) => caches.delete(key));
+    });
+  }
 }
