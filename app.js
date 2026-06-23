@@ -1,7 +1,8 @@
 const STORAGE_KEY = "ai-companion-j-v1";
+const PHOTO_STORAGE_KEY = "ai-companion-j-profile-photo";
 
 const character = {
-  name: "j",
+  name: "J",
   age: "20대 중반",
   startRelation: "친해진 친구",
   userName: "너",
@@ -34,8 +35,16 @@ const inputEl = document.querySelector("#messageInput");
 const stageEl = document.querySelector("#relationshipStage");
 const affectionEl = document.querySelector("#affectionScore");
 const resetButton = document.querySelector("#resetButton");
+const profileButton = document.querySelector("#profileButton");
+const profileSheet = document.querySelector("#profileSheet");
+const photoInput = document.querySelector("#photoInput");
+const avatarImage = document.querySelector("#avatarImage");
+const avatarInitial = document.querySelector("#avatarInitial");
+const profileImage = document.querySelector("#profileImage");
+const profileInitial = document.querySelector("#profileInitial");
 
 render();
+renderProfilePhoto();
 clearOldAppCache();
 
 formEl.addEventListener("submit", (event) => {
@@ -58,12 +67,34 @@ formEl.addEventListener("submit", (event) => {
 inputEl.addEventListener("input", autoResizeInput);
 
 resetButton.addEventListener("click", () => {
-  const ok = window.confirm("j와의 대화를 처음부터 다시 시작할까?");
+  const ok = window.confirm("J와의 대화를 처음부터 다시 시작할까?");
   if (!ok) return;
 
   state = createInitialState();
   saveState();
   render();
+});
+
+profileButton.addEventListener("click", openProfileSheet);
+
+document.querySelectorAll("[data-close-profile]").forEach((node) => {
+  node.addEventListener("click", closeProfileSheet);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeProfileSheet();
+});
+
+photoInput.addEventListener("change", (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    window.localStorage.setItem(PHOTO_STORAGE_KEY, String(reader.result));
+    renderProfilePhoto();
+  });
+  reader.readAsDataURL(file);
 });
 
 function createInitialState() {
@@ -106,7 +137,41 @@ function renderStatus() {
   const stage = getCurrentStage();
   stageEl.textContent = stage.label;
   affectionEl.textContent = Math.min(100, Math.max(0, Math.round(state.affection)));
-  document.querySelector(".eyebrow").textContent = stage.label;
+}
+
+function renderProfilePhoto() {
+  const savedPhoto = window.localStorage.getItem(PHOTO_STORAGE_KEY);
+  const images = [avatarImage, profileImage];
+  const initials = [avatarInitial, profileInitial];
+
+  if (!savedPhoto) {
+    images.forEach((image) => {
+      image.hidden = true;
+      image.removeAttribute("src");
+    });
+    initials.forEach((initial) => {
+      initial.hidden = false;
+    });
+    return;
+  }
+
+  images.forEach((image) => {
+    image.src = savedPhoto;
+    image.hidden = false;
+  });
+  initials.forEach((initial) => {
+    initial.hidden = true;
+  });
+}
+
+function openProfileSheet() {
+  profileSheet.classList.add("open");
+  profileSheet.setAttribute("aria-hidden", "false");
+}
+
+function closeProfileSheet() {
+  profileSheet.classList.remove("open");
+  profileSheet.setAttribute("aria-hidden", "true");
 }
 
 function addMessage(role, text) {
@@ -129,7 +194,7 @@ function showTyping() {
   const node = document.createElement("div");
   node.className = "message j typing";
   node.dataset.typing = "true";
-  node.textContent = "j가 입력 중...";
+  node.textContent = "J가 입력 중...";
   messagesEl.appendChild(node);
   scrollToBottom();
 }
