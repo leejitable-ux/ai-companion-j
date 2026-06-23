@@ -50,6 +50,55 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+.launch-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(141, 214, 255, 0.5), transparent 18rem),
+    linear-gradient(180deg, #f8fcff 0%, #eaf7ff 100%);
+  color: var(--text);
+  text-align: center;
+  opacity: 1;
+  transition:
+    opacity 360ms ease,
+    transform 360ms ease;
+}
+
+.launch-screen.hide {
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.02);
+}
+
+.launch-mark {
+  width: 86px;
+  height: 86px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.28), transparent),
+    linear-gradient(145deg, #91d9ff, var(--skin-primary-strong));
+  color: #ffffff;
+  font-size: 42px;
+  font-weight: 850;
+  letter-spacing: -0.06em;
+  box-shadow: 0 22px 54px rgba(45, 142, 208, 0.26);
+}
+
+.launch-screen p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
 .app-shell {
   min-height: 100%;
   display: grid;
