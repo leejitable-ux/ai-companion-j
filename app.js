@@ -8,6 +8,7 @@ const defaultSettings = {
   jealousy: "medium",
   sulkiness: "medium",
   replyLength: "short",
+  styleMemo: "",
 };
 
 const relationshipStages = [
@@ -50,6 +51,7 @@ const playfulnessSetting = document.querySelector("#playfulnessSetting");
 const jealousySetting = document.querySelector("#jealousySetting");
 const sulkinessSetting = document.querySelector("#sulkinessSetting");
 const replyLengthSetting = document.querySelector("#replyLengthSetting");
+const styleMemoSetting = document.querySelector("#styleMemoSetting");
 
 render();
 renderProfilePhoto();
@@ -100,6 +102,8 @@ photoInput.addEventListener("change", (event) => {
 [toneSetting, playfulnessSetting, jealousySetting, sulkinessSetting, replyLengthSetting].forEach((select) => {
   select.addEventListener("change", saveSettingsFromForm);
 });
+
+styleMemoSetting.addEventListener("input", saveSettingsFromForm);
 
 function hideLaunchScreen() {
   if (!launchScreen) return;
@@ -194,6 +198,7 @@ function saveSettingsFromForm() {
     jealousy: jealousySetting.value,
     sulkiness: sulkinessSetting.value,
     replyLength: replyLengthSetting.value,
+    styleMemo: styleMemoSetting.value.slice(0, 4000),
   };
   saveSettings();
 }
@@ -204,6 +209,7 @@ function renderSettings() {
   jealousySetting.value = settings.jealousy;
   sulkinessSetting.value = settings.sulkiness;
   replyLengthSetting.value = settings.replyLength;
+  styleMemoSetting.value = settings.styleMemo || "";
 }
 
 function render() {
