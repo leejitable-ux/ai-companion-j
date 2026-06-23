@@ -1,6 +1,7 @@
 const STORAGE_KEY = "ai-companion-j-v1";
 const PHOTO_STORAGE_KEY = "ai-companion-j-profile-photo";
 const SETTINGS_STORAGE_KEY = "ai-companion-j-settings";
+const STYLE_REFERENCE_LIMIT = 8000;
 
 const defaultSettings = {
   tone: "warm",
@@ -118,12 +119,14 @@ async function handleSubmit(event) {
   const text = inputEl.value.trim();
   if (!text) return;
 
+  const idleMs = getIdleMs();
+
   addMessage("user", text);
   inputEl.value = "";
   autoResizeInput();
   updateAffection(text);
 
-  const timing = getReplyTiming(text);
+  const timing = getReplyTiming(text, idleMs);
   await wait(timing.firstDelay);
 
   let bridgeMessage = null;
@@ -198,7 +201,7 @@ function saveSettingsFromForm() {
     jealousy: jealousySetting.value,
     sulkiness: sulkinessSetting.value,
     replyLength: replyLengthSetting.value,
-    styleMemo: styleMemoSetting.value.slice(0, 4000),
+    styleMemo: styleMemoSetting.value.slice(0, STYLE_REFERENCE_LIMIT),
   };
   saveSettings();
 }
@@ -342,19 +345,44 @@ function getCurrentStage() {
     .find((stage) => state.affection >= stage.min);
 }
 
-function getReplyTiming(text) {
+function getIdleMs() {
+  const lastRealMessage = state.messages
+    .slice()
+    .reverse()
+    .find((message) => !message.transient && !message.text.startsWith("AI 연결 오류:"));
+
+  return lastRealMessage?.at ? Date.now() - lastRealMessage.at : Number.POSITIVE_INFINITY;
+}
+
+function getReplyTiming(text, idleMs = 0) {
   const emotional = ["힘들", "우울", "외로", "보고", "좋아", "사랑", "미안", "화나", "서운"].some((word) =>
     text.includes(word)
   );
   const longText = text.length > 35;
   const close = state.affection >= 72;
-  const shouldBridge = Math.random() < (emotional || longText ? 0.34 : 0.16);
+  const longSilence = idleMs >= 30 * 60 * 1000;
+  const shortSilence = idleMs >= 10 * 60 * 1000;
+  const shouldBridge = !longSilence && Math.random() < (emotional || longText ? 0.30 : 0.12);
 
   return {
-    firstDelay: randomBetween(550, 1400),
-    secondDelay: emotional || longText ? randomBetween(2100, 4200) : randomBetween(900, 2400),
+    firstDelay: getInitialReplyDelay({ longSilence, shortSilence }),
+    secondDelay: emotional || longText ? randomBetween(2200, 5200) : randomBetween(1000, 2600),
     bridge: shouldBridge ? pickBridgeMessage({ close, emotional }) : "",
   };
+}
+
+function getInitialReplyDelay({ longSilence, shortSilence }) {
+  if (longSilence) return pickLongSilenceDelay();
+  if (shortSilence) return randomBetween(5000, 30000);
+  return randomBetween(750, 1700);
+}
+
+function pickLongSilenceDelay() {
+  const roll = Math.random();
+  if (roll < 0.52) return randomBetween(5000, 25000);
+  if (roll < 0.80) return randomBetween(25000, 90000);
+  if (roll < 0.94) return randomBetween(90000, 240000);
+  return randomBetween(240000, 600000);
 }
 
 function pickBridgeMessage({ close, emotional }) {
