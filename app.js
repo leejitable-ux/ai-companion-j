@@ -4,6 +4,8 @@ const SETTINGS_STORAGE_KEY = "ai-companion-j-settings";
 const STYLE_REFERENCE_LIMIT = 8000;
 
 const defaultSettings = {
+  ageRange: "mid20s",
+  ageRelation: "same",
   tone: "warm",
   playfulness: "medium",
   jealousy: "medium",
@@ -91,6 +93,8 @@ const avatarImage = document.querySelector("#avatarImage");
 const avatarInitial = document.querySelector("#avatarInitial");
 const profileImage = document.querySelector("#profileImage");
 const profileInitial = document.querySelector("#profileInitial");
+const ageRangeSetting = document.querySelector("#ageRangeSetting");
+const ageRelationSetting = document.querySelector("#ageRelationSetting");
 const toneSetting = document.querySelector("#toneSetting");
 const playfulnessSetting = document.querySelector("#playfulnessSetting");
 const jealousySetting = document.querySelector("#jealousySetting");
@@ -147,7 +151,15 @@ photoInput.addEventListener("change", (event) => {
   reader.readAsDataURL(file);
 });
 
-[toneSetting, playfulnessSetting, jealousySetting, sulkinessSetting, replyLengthSetting].forEach((select) => {
+[
+  ageRangeSetting,
+  ageRelationSetting,
+  toneSetting,
+  playfulnessSetting,
+  jealousySetting,
+  sulkinessSetting,
+  replyLengthSetting,
+].forEach((select) => {
   select.addEventListener("change", saveSettingsFromForm);
 });
 
@@ -184,7 +196,6 @@ function renderScenarioChoices() {
 }
 
 function startScenario(key) {
-  const scenario = scenarios[key] || scenarios.closeFriend;
   state = createInitialState(key);
   saveState();
   renderAppMode();
@@ -211,24 +222,15 @@ async function handleSubmit(event) {
 
   const timing = getReplyTiming(text, idleMs);
   await wait(timing.firstDelay);
-
-  let bridgeMessage = null;
-  if (timing.bridge) {
-    bridgeMessage = addMessage("j", timing.bridge, { transient: true });
-    await wait(timing.secondDelay);
-  } else {
-    showTyping();
-    await wait(timing.secondDelay);
-  }
+  showTyping();
+  await wait(timing.secondDelay);
 
   try {
     const reply = await createAiReply(text);
     removeTyping();
-    if (bridgeMessage) removeMessage(bridgeMessage);
     addMessage("j", reply);
   } catch (error) {
     removeTyping();
-    if (bridgeMessage) removeMessage(bridgeMessage);
     addMessage("j", `AI 연결 오류: ${error.message || "알 수 없는 오류"}`);
   }
 }
@@ -305,6 +307,8 @@ function saveSettings() {
 
 function saveSettingsFromForm() {
   settings = {
+    ageRange: ageRangeSetting.value,
+    ageRelation: ageRelationSetting.value,
     tone: toneSetting.value,
     playfulness: playfulnessSetting.value,
     jealousy: jealousySetting.value,
@@ -316,6 +320,8 @@ function saveSettingsFromForm() {
 }
 
 function renderSettings() {
+  ageRangeSetting.value = settings.ageRange;
+  ageRelationSetting.value = settings.ageRelation;
   toneSetting.value = settings.tone;
   playfulnessSetting.value = settings.playfulness;
   jealousySetting.value = settings.jealousy;
@@ -401,12 +407,6 @@ function addMessage(role, text, options = {}) {
   return message;
 }
 
-function removeMessage(message) {
-  state.messages = state.messages.filter((item) => item.id !== message.id);
-  saveState();
-  document.querySelector(`[data-message-id="${message.id}"]`)?.remove();
-}
-
 function appendMessageNode(role, text, id) {
   const node = document.createElement("div");
   node.className = `message ${role}`;
@@ -461,20 +461,7 @@ function updateAffection(text) {
 }
 
 function detectPrematureRomance(text) {
-  const terms = [
-    "자기",
-    "여보",
-    "애기",
-    "공주",
-    "내꺼",
-    "사랑해",
-    "사랑한다",
-    "뽀뽀",
-    "키스",
-    "안아줘",
-    "안기고",
-    "보고싶어 죽겠",
-  ];
+  const terms = ["자기", "여보", "애기", "공주", "내꺼", "사랑해", "사랑한다", "뽀뽀", "키스", "안아줘", "안기고", "보고싶어 죽겠"];
   const matched = terms.filter((term) => text.includes(term));
   const tooFast = matched.length > 0 && state.affection < 72;
   return { tooFast, terms: matched };
@@ -497,19 +484,14 @@ function getIdleMs() {
 }
 
 function getReplyTiming(text, idleMs = 0) {
-  const emotional = ["힘들", "우울", "외로", "보고", "좋아", "사랑", "미안", "화나", "서운"].some((word) =>
-    text.includes(word)
-  );
+  const emotional = ["힘들", "우울", "외로", "보고", "좋아", "사랑", "미안", "화나", "서운"].some((word) => text.includes(word));
   const longText = text.length > 35;
-  const close = state.affection >= 72;
   const longSilence = idleMs >= 30 * 60 * 1000;
   const shortSilence = idleMs >= 10 * 60 * 1000;
-  const shouldBridge = !longSilence && Math.random() < (emotional || longText ? 0.30 : 0.12);
 
   return {
     firstDelay: getInitialReplyDelay({ longSilence, shortSilence }),
     secondDelay: emotional || longText ? randomBetween(2200, 5200) : randomBetween(1000, 2600),
-    bridge: shouldBridge ? pickBridgeMessage({ close, emotional }) : "",
   };
 }
 
@@ -525,14 +507,6 @@ function pickLongSilenceDelay() {
   if (roll < 0.80) return randomBetween(25000, 90000);
   if (roll < 0.94) return randomBetween(90000, 240000);
   return randomBetween(240000, 600000);
-}
-
-function pickBridgeMessage({ close, emotional }) {
-  const casual = ["음...", "잠깐만", "아 이건 좀", "기다려봐", "나 방금 읽고 멈칫했어"];
-  const closeOnes = ["잠깐만 자기", "아 자기야 이건 좀", "나 지금 살짝 멈췄어", "음... 자기 잠깐만"];
-  const pool = close ? closeOnes : casual;
-  if (emotional && Math.random() < 0.5) return close ? "잠깐만 자기" : "나 방금 읽고 멈칫했어";
-  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function randomBetween(min, max) {
