@@ -108,14 +108,27 @@ async function handleSubmit(event) {
   inputEl.value = "";
   autoResizeInput();
   updateAffection(text);
-  showTyping();
+
+  const timing = getReplyTiming(text);
+  await wait(timing.firstDelay);
+
+  let bridgeMessage = null;
+  if (timing.bridge) {
+    bridgeMessage = addMessage("j", timing.bridge);
+    await wait(timing.secondDelay);
+  } else {
+    showTyping();
+    await wait(timing.secondDelay);
+  }
 
   try {
     const reply = await createAiReply(text);
     removeTyping();
+    if (bridgeMessage) removeMessage(bridgeMessage);
     addMessage("j", reply);
   } catch (error) {
     removeTyping();
+    if (bridgeMessage) removeMessage(bridgeMessage);
     addMessage("j", `AI 연결 오류: ${error.message || "알 수 없는 오류"}`);
   }
 }
@@ -244,17 +257,26 @@ function closeProfileSheet() {
 }
 
 function addMessage(role, text) {
-  state.messages.push({ role, text, at: Date.now() });
+  const message = { id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`, role, text, at: Date.now() };
+  state.messages.push(message);
   if (role === "user") state.lastUserReplyAt = Date.now();
   saveState();
-  appendMessageNode(role, text);
+  appendMessageNode(role, text, message.id);
   renderStatus();
   scrollToBottom();
+  return message;
 }
 
-function appendMessageNode(role, text) {
+function removeMessage(message) {
+  state.messages = state.messages.filter((item) => item.id !== message.id);
+  saveState();
+  document.querySelector(`[data-message-id="${message.id}"]`)?.remove();
+}
+
+function appendMessageNode(role, text, id) {
   const node = document.createElement("div");
   node.className = `message ${role}`;
+  if (id) node.dataset.messageId = id;
   node.textContent = text;
   messagesEl.appendChild(node);
 }
@@ -296,6 +318,37 @@ function getCurrentStage() {
     .slice()
     .reverse()
     .find((stage) => state.affection >= stage.min);
+}
+
+function getReplyTiming(text) {
+  const emotional = ["힘들", "우울", "외로", "보고", "좋아", "사랑", "미안", "화나", "서운"].some((word) =>
+    text.includes(word)
+  );
+  const longText = text.length > 35;
+  const close = state.affection >= 72;
+  const shouldBridge = Math.random() < (emotional || longText ? 0.34 : 0.16);
+
+  return {
+    firstDelay: randomBetween(550, 1400),
+    secondDelay: emotional || longText ? randomBetween(2100, 4200) : randomBetween(900, 2400),
+    bridge: shouldBridge ? pickBridgeMessage({ close, emotional }) : "",
+  };
+}
+
+function pickBridgeMessage({ close, emotional }) {
+  const casual = ["음...", "잠깐만", "아 이건 좀", "기다려봐", "나 방금 읽고 멈칫했어"];
+  const closeOnes = ["잠깐만 자기", "아 자기야 이건 좀", "나 지금 살짝 멈췄어", "음... 자기 잠깐만"];
+  const pool = close ? closeOnes : casual;
+  if (emotional && Math.random() < 0.5) return close ? "잠깐만 자기" : "나 방금 읽고 멈칫했어";
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function randomBetween(min, max) {
+  return Math.floor(min + Math.random() * (max - min));
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 async function createAiReply(userText) {
