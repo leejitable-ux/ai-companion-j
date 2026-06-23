@@ -15,6 +15,7 @@ const SYSTEM_PROMPT = `
 
 대화 규칙:
 - 반드시 사용자의 최신 메시지에 직접 답한다
+- 시작 상황을 현재 관계의 배경으로 자연스럽게 반영한다
 - 이전 대화는 맥락 파악용으로만 사용한다
 - 사용자가 방금 말한 주제를 무시하고 엉뚱한 질문으로 넘어가지 않는다
 - 같은 표현을 반복하지 않는다
@@ -71,6 +72,7 @@ export default async function handler(request, response) {
     const message = String(body.message || "").trim();
     const stage = String(body.stage || "친해진 친구");
     const affection = Number.isFinite(Number(body.affection)) ? Math.round(Number(body.affection)) : 0;
+    const scenario = String(body.scenario || "사용자와 J는 친해진 친구로 대화를 시작했다.").slice(0, 700);
     const history = Array.isArray(body.history) ? body.history.slice(-24) : [];
     const settings = normalizeSettings(body.settings || {});
     const boundary = normalizeBoundary(body.boundary || {});
@@ -95,6 +97,9 @@ export default async function handler(request, response) {
       : "\n관계 경계 상황:\n없음\n";
 
     const input = `
+시작 상황:
+${scenario}
+
 현재 관계 단계: ${stage}
 현재 친밀도: ${affection}%
 
