@@ -31,7 +31,7 @@ export default async function handler(request, response) {
   }
 
   try {
-    const body = await request.json();
+    const body = await readBody(request);
     const message = String(body.message || "").trim();
     const stage = String(body.stage || "친해진 친구");
     const affection = Number.isFinite(Number(body.affection)) ? Math.round(Number(body.affection)) : 0;
@@ -68,7 +68,7 @@ J의 다음 답장만 작성해.
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-5.4-mini",
+        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
         instructions: SYSTEM_PROMPT,
         input,
         max_output_tokens: 220,
@@ -89,8 +89,26 @@ J의 다음 답장만 작성해.
       reply: reply || "응, 나 듣고 있어. 조금만 더 말해줘.",
     });
   } catch (error) {
-    return response.status(500).json({ error: "Failed to create reply" });
+    return response.status(500).json({ error: error?.message || "Failed to create reply" });
   }
+}
+
+async function readBody(request) {
+  if (request.body && typeof request.body === "object" && !Buffer.isBuffer(request.body)) {
+    return request.body;
+  }
+
+  if (typeof request.body === "string") {
+    return JSON.parse(request.body || "{}");
+  }
+
+  const chunks = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  const raw = Buffer.concat(chunks).toString("utf8");
+  return raw ? JSON.parse(raw) : {};
 }
 
 function extractText(data) {
