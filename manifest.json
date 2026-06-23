@@ -1,0 +1,17 @@
+{
+  "name": "j - AI Companion",
+  "short_name": "j",
+  "description": "개인용 한국어 AI companion 채팅 앱",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff7f9",
+  "theme_color": "#f4c7d7",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
