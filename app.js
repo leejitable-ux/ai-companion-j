@@ -30,6 +30,7 @@ const starterMessages = [
 
 let state = loadState();
 let settings = loadSettings();
+let pendingBoundary = { tooFast: false, terms: [] };
 
 const launchScreen = document.querySelector("#launchScreen");
 const messagesEl = document.querySelector("#messages");
@@ -124,7 +125,7 @@ async function handleSubmit(event) {
   addMessage("user", text);
   inputEl.value = "";
   autoResizeInput();
-  updateAffection(text);
+  pendingBoundary = updateAffection(text);
 
   const timing = getReplyTiming(text, idleMs);
   await wait(timing.firstDelay);
@@ -331,11 +332,44 @@ function autoResizeInput() {
 }
 
 function updateAffection(text) {
+  const boundary = detectPrematureRomance(text);
   const warmWords = ["좋아", "보고", "고마워", "귀여", "사랑", "힘들", "외로", "생각"];
   const questionBonus = text.includes("?") || text.includes("？") ? 1 : 0;
   const warmBonus = warmWords.some((word) => text.includes(word)) ? 2 : 0;
   const lengthBonus = text.length > 18 ? 1 : 0;
-  state.affection = Math.min(100, state.affection + 2 + questionBonus + warmBonus + lengthBonus);
+  const baseGain = 2 + questionBonus + warmBonus + lengthBonus;
+
+  if (boundary.tooFast) {
+    const penalty = state.affection < 25 ? 7 : state.affection < 48 ? 5 : 3;
+    state.affection = Math.max(0, state.affection + Math.max(0, baseGain - 2) - penalty);
+    saveState();
+    renderStatus();
+    return boundary;
+  }
+
+  state.affection = Math.min(100, state.affection + baseGain);
+  saveState();
+  return boundary;
+}
+
+function detectPrematureRomance(text) {
+  const terms = [
+    "자기",
+    "여보",
+    "애기",
+    "공주",
+    "내꺼",
+    "사랑해",
+    "사랑한다",
+    "뽀뽀",
+    "키스",
+    "안아줘",
+    "안기고",
+    "보고싶어 죽겠",
+  ];
+  const matched = terms.filter((term) => text.includes(term));
+  const tooFast = matched.length > 0 && state.affection < 72;
+  return { tooFast, terms: matched };
 }
 
 function getCurrentStage() {
@@ -414,6 +448,7 @@ async function createAiReply(userText) {
       stage: getCurrentStage().label,
       affection: state.affection,
       settings,
+      boundary: pendingBoundary,
       history: buildConversationHistory(userText),
     }),
   });
@@ -424,6 +459,7 @@ async function createAiReply(userText) {
     throw new Error(data.error || `HTTP ${response.status}`);
   }
 
+  pendingBoundary = { tooFast: false, terms: [] };
   return String(data.reply).trim();
 }
 
