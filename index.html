@@ -6,33 +6,27 @@
     <meta name="theme-color" content="#eef8ff" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="j" />
-    <title>j - AI Companion</title>
-    <link rel="manifest" href="./manifest.json?v=3" />
-    <link rel="stylesheet" href="./styles.css?v=3" />
+    <meta name="apple-mobile-web-app-title" content="J" />
+    <title>J - AI Companion</title>
+    <link rel="manifest" href="./manifest.json?v=4" />
+    <link rel="stylesheet" href="./styles.css?v=4" />
   </head>
   <body>
     <main class="app-shell">
-      <section class="chat-card" aria-label="j와의 채팅">
+      <section class="chat-card" aria-label="J와의 채팅">
         <header class="chat-header">
-          <div class="avatar" aria-hidden="true">j</div>
-          <div>
-            <p class="eyebrow">친해진 친구</p>
-            <h1>j</h1>
-          </div>
+          <button class="profile-trigger" id="profileButton" type="button" aria-label="J 프로필 보기">
+            <span class="avatar" aria-hidden="true">
+              <img id="avatarImage" alt="" hidden />
+              <span id="avatarInitial">J</span>
+            </span>
+            <span class="title-block">
+              <span class="eyebrow">온라인</span>
+              <span class="chat-title">J</span>
+            </span>
+          </button>
           <button class="ghost-button" id="resetButton" type="button">초기화</button>
         </header>
-
-        <div class="status-panel">
-          <div>
-            <span>관계</span>
-            <strong id="relationshipStage">친해진 친구</strong>
-          </div>
-          <div>
-            <span>친밀도</span>
-            <strong><span id="affectionScore">12</span>%</strong>
-          </div>
-        </div>
 
         <section class="messages" id="messages" aria-live="polite"></section>
 
@@ -43,13 +37,50 @@
             name="message"
             rows="1"
             autocomplete="off"
-            placeholder="j에게 메시지 보내기"
+            placeholder="J에게 메시지 보내기"
           ></textarea>
           <button type="submit">전송</button>
         </form>
       </section>
     </main>
 
-    <script src="./app.js?v=3"></script>
+    <section class="profile-sheet" id="profileSheet" aria-hidden="true">
+      <div class="sheet-backdrop" data-close-profile></div>
+      <div class="sheet-card" role="dialog" aria-modal="true" aria-label="J 프로필 정보">
+        <button class="sheet-close" type="button" data-close-profile aria-label="닫기">×</button>
+        <label class="profile-photo" for="photoInput">
+          <img id="profileImage" alt="J 프로필 사진" hidden />
+          <span id="profileInitial">J</span>
+          <small>사진 변경</small>
+        </label>
+        <input class="sr-only" id="photoInput" type="file" accept="image/*" />
+
+        <h2>J</h2>
+        <p class="profile-subtitle">다정하고 장난기 있는 20대 중반</p>
+
+        <div class="profile-stats">
+          <div>
+            <span>관계</span>
+            <strong id="relationshipStage">친해진 친구</strong>
+          </div>
+          <div>
+            <span>친밀도</span>
+            <strong><span id="affectionScore">12</span>%</strong>
+          </div>
+          <div>
+            <span>질투</span>
+            <strong>중간</strong>
+          </div>
+          <div>
+            <span>서운함</span>
+            <strong>중간</strong>
+          </div>
+        </div>
+
+        <p class="sheet-hint">대화가 쌓이면 관계 단계와 호칭이 조금씩 변해.</p>
+      </div>
+    </section>
+
+    <script src="./app.js?v=4"></script>
   </body>
 </html>
