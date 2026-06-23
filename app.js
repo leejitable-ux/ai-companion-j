@@ -12,6 +12,54 @@ const defaultSettings = {
   styleMemo: "",
 };
 
+const scenarios = {
+  closeFriend: {
+    icon: "☁️",
+    title: "친해진 친구",
+    description: "이미 어느 정도 편하고, 천천히 더 가까워지는 사이",
+    stage: "친해진 친구",
+    affection: 12,
+    context: "사용자와 J는 이미 어느 정도 친해진 친구다. 편하지만 아직 연인처럼 대하기엔 이르다.",
+    starter: "왔네. 나 방금 네 생각하고 있었는데.\n오늘은 좀 어땠어? 편하게 말해도 돼.",
+  },
+  reconnected: {
+    icon: "🌙",
+    title: "오랜만에 다시 연락한 사이",
+    description: "반갑지만 살짝 어색한 거리감에서 다시 시작",
+    stage: "친해진 친구",
+    affection: 8,
+    context: "사용자와 J는 한동안 연락이 없다가 다시 대화를 시작했다. 반가움과 살짝 어색함이 함께 있다.",
+    starter: "오랜만이다.\n뭔가 괜히 어색한데 또 반갑네. 잘 지냈어?",
+  },
+  dailyFriend: {
+    icon: "💬",
+    title: "매일 연락하는 친구",
+    description: "별일 없어도 톡하는 편한 친구 같은 시작",
+    stage: "서로 신경 쓰는 사이",
+    affection: 24,
+    context: "사용자와 J는 매일 가볍게 연락하는 편한 친구다. 장난과 일상 공유가 자연스럽다.",
+    starter: "뭐해.\n나 그냥 별일 없는데 괜히 톡 보내고 싶었어 ㅋㅋ",
+  },
+  almostFlirt: {
+    icon: "✨",
+    title: "썸 직전의 친구",
+    description: "친구인데 서로 은근히 신경 쓰는 분위기",
+    stage: "서로 신경 쓰는 사이",
+    affection: 36,
+    context: "사용자와 J는 친구지만 서로 은근히 신경 쓰는 분위기다. 설렘은 있지만 확실한 연인 사이는 아니다.",
+    starter: "왔네.\n나 너한테 톡 오면 괜히 좀 기분 좋아지는 거 알아? 아, 너무 티 냈나 ㅋㅋ",
+  },
+  newPerson: {
+    icon: "🫧",
+    title: "막 알게 된 사람",
+    description: "조금 낯설고 조심스럽게 알아가는 시작",
+    stage: "친해진 친구",
+    affection: 4,
+    context: "사용자와 J는 막 알게 된 사이다. 아직은 조심스럽고 서로를 알아가는 단계다.",
+    starter: "안녕.\n아직은 좀 어색한데, 그래도 천천히 얘기해보면 좋겠다.",
+  },
+};
+
 const relationshipStages = [
   { label: "친해진 친구", min: 0 },
   { label: "서로 신경 쓰는 사이", min: 25 },
@@ -20,19 +68,14 @@ const relationshipStages = [
   { label: "안정적인 연인", min: 90 },
 ];
 
-const starterMessages = [
-  {
-    role: "j",
-    text: "왔네. 나 방금 네 생각하고 있었는데.\n오늘은 좀 어땠어? 편하게 말해도 돼.",
-    at: Date.now(),
-  },
-];
-
 let state = loadState();
 let settings = loadSettings();
 let pendingBoundary = { tooFast: false, terms: [] };
 
 const launchScreen = document.querySelector("#launchScreen");
+const onboardingEl = document.querySelector("#onboarding");
+const scenarioListEl = document.querySelector("#scenarioList");
+const appShell = document.querySelector("#appShell");
 const messagesEl = document.querySelector("#messages");
 const formEl = document.querySelector("#chatForm");
 const inputEl = document.querySelector("#messageInput");
@@ -55,6 +98,8 @@ const sulkinessSetting = document.querySelector("#sulkinessSetting");
 const replyLengthSetting = document.querySelector("#replyLengthSetting");
 const styleMemoSetting = document.querySelector("#styleMemoSetting");
 
+renderScenarioChoices();
+renderAppMode();
 render();
 renderProfilePhoto();
 renderSettings();
@@ -71,11 +116,12 @@ inputEl.addEventListener("keydown", (event) => {
 });
 
 resetButton.addEventListener("click", () => {
-  const ok = window.confirm("J와의 대화를 처음부터 다시 시작할까?");
+  const ok = window.confirm("J와의 대화를 처음부터 다시 시작하고 상황도 다시 고를까?");
   if (!ok) return;
 
-  state = createInitialState();
+  state = createUnstartedState();
   saveState();
+  renderAppMode();
   render();
 });
 
@@ -115,6 +161,42 @@ function hideLaunchScreen() {
   }, 1250);
 }
 
+function renderScenarioChoices() {
+  if (!scenarioListEl) return;
+  scenarioListEl.innerHTML = Object.entries(scenarios)
+    .map(
+      ([key, scenario]) => `
+        <button class="scenario-button" type="button" data-scenario="${key}">
+          <span class="scenario-icon" aria-hidden="true">${scenario.icon}</span>
+          <span>
+            <span class="scenario-title">${scenario.title}</span>
+            <span class="scenario-desc">${scenario.description}</span>
+          </span>
+          <span class="scenario-arrow" aria-hidden="true">›</span>
+        </button>
+      `
+    )
+    .join("");
+
+  scenarioListEl.querySelectorAll("[data-scenario]").forEach((button) => {
+    button.addEventListener("click", () => startScenario(button.dataset.scenario));
+  });
+}
+
+function startScenario(key) {
+  const scenario = scenarios[key] || scenarios.closeFriend;
+  state = createInitialState(key);
+  saveState();
+  renderAppMode();
+  render();
+}
+
+function renderAppMode() {
+  const needsOnboarding = !state.started;
+  onboardingEl.hidden = !needsOnboarding;
+  appShell.hidden = needsOnboarding;
+}
+
 async function handleSubmit(event) {
   event.preventDefault();
   const text = inputEl.value.trim();
@@ -151,10 +233,32 @@ async function handleSubmit(event) {
   }
 }
 
-function createInitialState() {
+function createUnstartedState() {
   return {
-    messages: starterMessages,
-    affection: 12,
+    started: false,
+    scenario: null,
+    scenarioContext: "",
+    messages: [],
+    affection: 0,
+    lastUserReplyAt: null,
+    facts: [],
+  };
+}
+
+function createInitialState(scenarioKey = "closeFriend") {
+  const scenario = scenarios[scenarioKey] || scenarios.closeFriend;
+  return {
+    started: true,
+    scenario: scenarioKey,
+    scenarioContext: scenario.context,
+    messages: [
+      {
+        role: "j",
+        text: scenario.starter,
+        at: Date.now(),
+      },
+    ],
+    affection: scenario.affection,
     lastUserReplyAt: null,
     facts: [],
   };
@@ -162,17 +266,21 @@ function createInitialState() {
 
 function loadState() {
   const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return createInitialState();
+  if (!raw) return createUnstartedState();
 
   try {
     const parsed = JSON.parse(raw);
+    if (!parsed.started && !parsed.messages?.length) return createUnstartedState();
+
+    const fallback = parsed.started ? createInitialState(parsed.scenario || "closeFriend") : createUnstartedState();
     return {
-      ...createInitialState(),
+      ...fallback,
       ...parsed,
-      messages: parsed.messages?.length ? parsed.messages : starterMessages,
+      messages: parsed.messages?.length ? parsed.messages : fallback.messages,
+      scenarioContext: parsed.scenarioContext || scenarios[parsed.scenario]?.context || fallback.scenarioContext || "",
     };
   } catch {
-    return createInitialState();
+    return createUnstartedState();
   }
 }
 
@@ -447,6 +555,7 @@ async function createAiReply(userText) {
       message: userText,
       stage: getCurrentStage().label,
       affection: state.affection,
+      scenario: state.scenarioContext,
       settings,
       boundary: pendingBoundary,
       history: buildConversationHistory(userText),
