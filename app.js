@@ -29,6 +29,7 @@ const starterMessages = [
 let state = loadState();
 let settings = loadSettings();
 
+const launchScreen = document.querySelector("#launchScreen");
 const messagesEl = document.querySelector("#messages");
 const formEl = document.querySelector("#chatForm");
 const inputEl = document.querySelector("#messageInput");
@@ -54,6 +55,7 @@ render();
 renderProfilePhoto();
 renderSettings();
 clearOldAppCache();
+hideLaunchScreen();
 
 formEl.addEventListener("submit", handleSubmit);
 
@@ -98,6 +100,14 @@ photoInput.addEventListener("change", (event) => {
 [toneSetting, playfulnessSetting, jealousySetting, sulkinessSetting, replyLengthSetting].forEach((select) => {
   select.addEventListener("change", saveSettingsFromForm);
 });
+
+function hideLaunchScreen() {
+  if (!launchScreen) return;
+  window.setTimeout(() => {
+    launchScreen.classList.add("hide");
+    window.setTimeout(() => launchScreen.remove(), 420);
+  }, 1250);
+}
 
 async function handleSubmit(event) {
   event.preventDefault();
