@@ -74,7 +74,8 @@ button {
   transform: scale(1.02);
 }
 
-.launch-mark {
+.launch-mark,
+.onboarding-logo {
   width: 86px;
   height: 86px;
   display: grid;
@@ -97,6 +98,137 @@ button {
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.03em;
+}
+
+.onboarding {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: max(22px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
+}
+
+.onboarding[hidden],
+.app-shell[hidden] {
+  display: none !important;
+}
+
+.onboarding-card {
+  width: min(100%, 440px);
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: 36px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 28px 80px var(--skin-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  padding: 24px 18px 18px;
+  text-align: center;
+  backdrop-filter: blur(22px) saturate(1.16);
+}
+
+.onboarding-card::-webkit-scrollbar {
+  width: 0;
+}
+
+.onboarding-logo {
+  width: 74px;
+  height: 74px;
+  border-radius: 24px;
+  font-size: 36px;
+}
+
+.onboarding-kicker {
+  margin: 18px 0 8px;
+  color: var(--skin-primary-strong);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+}
+
+.onboarding h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: 25px;
+  line-height: 1.18;
+  letter-spacing: -0.05em;
+}
+
+.onboarding-copy {
+  margin: 10px auto 18px;
+  max-width: 300px;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+}
+
+.scenario-list {
+  display: grid;
+  gap: 10px;
+}
+
+.scenario-button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(53, 126, 176, 0.14);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff, #f7fcff);
+  color: var(--text);
+  padding: 14px 14px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(28, 94, 137, 0.06);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.scenario-button:active {
+  transform: scale(0.99);
+}
+
+.scenario-button:hover {
+  border-color: rgba(74, 174, 232, 0.38);
+  box-shadow: 0 12px 26px rgba(28, 94, 137, 0.1);
+}
+
+.scenario-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--skin-primary-soft);
+  color: var(--skin-primary-strong);
+  font-size: 21px;
+}
+
+.scenario-title {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.scenario-desc {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.38;
+  letter-spacing: -0.02em;
+}
+
+.scenario-arrow {
+  color: var(--text-faint);
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .app-shell {
@@ -513,17 +645,24 @@ textarea:focus {
     background: linear-gradient(180deg, #f7fcff 0%, #eef8ff 100%);
   }
 
-  .app-shell {
+  .app-shell,
+  .onboarding {
     padding: 0;
   }
 
-  .chat-card {
+  .chat-card,
+  .onboarding-card {
     width: 100%;
     height: 100dvh;
+    max-height: none;
     min-height: 100dvh;
     border: 0;
     border-radius: 0;
     box-shadow: none;
+  }
+
+  .onboarding-card {
+    padding: max(28px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
   }
 
   .chat-header {
