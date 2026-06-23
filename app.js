@@ -114,7 +114,7 @@ async function handleSubmit(event) {
 
   let bridgeMessage = null;
   if (timing.bridge) {
-    bridgeMessage = addMessage("j", timing.bridge);
+    bridgeMessage = addMessage("j", timing.bridge, { transient: true });
     await wait(timing.secondDelay);
   } else {
     showTyping();
@@ -198,7 +198,7 @@ function renderSettings() {
 
 function render() {
   messagesEl.innerHTML = "";
-  state.messages.forEach((message) => appendMessageNode(message.role, message.text));
+  state.messages.forEach((message) => appendMessageNode(message.role, message.text, message.id));
   renderStatus();
   scrollToBottom();
 }
@@ -256,8 +256,14 @@ function closeProfileSheet() {
   profileSheet.setAttribute("aria-hidden", "true");
 }
 
-function addMessage(role, text) {
-  const message = { id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`, role, text, at: Date.now() };
+function addMessage(role, text, options = {}) {
+  const message = {
+    id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`,
+    role,
+    text,
+    at: Date.now(),
+    transient: Boolean(options.transient),
+  };
   state.messages.push(message);
   if (role === "user") state.lastUserReplyAt = Date.now();
   saveState();
@@ -285,7 +291,7 @@ function showTyping() {
   const node = document.createElement("div");
   node.className = "message j typing";
   node.dataset.typing = "true";
-  node.textContent = "J가 입력 중...";
+  node.textContent = "입력중...";
   messagesEl.appendChild(node);
   scrollToBottom();
 }
@@ -364,7 +370,7 @@ async function createAiReply(userText) {
       stage: getCurrentStage().label,
       affection: state.affection,
       settings,
-      history: state.messages.slice(-14),
+      history: buildConversationHistory(userText),
     }),
   });
 
@@ -375,6 +381,22 @@ async function createAiReply(userText) {
   }
 
   return String(data.reply).trim();
+}
+
+function buildConversationHistory(currentText) {
+  const normalizedCurrent = currentText.trim();
+  return state.messages
+    .filter((message) => !message.transient && !message.text.startsWith("AI 연결 오류:"))
+    .filter((message, index, messages) => {
+      const isLatest = index === messages.length - 1;
+      return !(isLatest && message.role === "user" && message.text.trim() === normalizedCurrent);
+    })
+    .slice(-24)
+    .map((message) => ({
+      role: message.role,
+      text: message.text,
+      at: message.at,
+    }));
 }
 
 function rememberSimpleFacts(text) {
