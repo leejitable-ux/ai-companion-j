@@ -8,8 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="J" />
     <title>J - AI Companion</title>
-    <link rel="manifest" href="./manifest.json?v=8" />
-    <link rel="stylesheet" href="./styles.css?v=8" />
+    <link rel="manifest" href="./manifest.json?v=9" />
+    <link rel="stylesheet" href="./styles.css?v=9" />
+    <link rel="stylesheet" href="./settings.css?v=9" />
   </head>
   <body>
     <main class="app-shell">
@@ -74,10 +75,57 @@
           </div>
         </div>
 
+        <section class="settings-card" aria-label="J 대화 설정">
+          <h3>대화 설정</h3>
+          <div class="setting-grid">
+            <label class="setting-field">
+              <span>말투</span>
+              <select id="toneSetting">
+                <option value="warm">다정하게</option>
+                <option value="playful">장난스럽게</option>
+                <option value="calm">차분하게</option>
+                <option value="direct">솔직하게</option>
+              </select>
+            </label>
+            <label class="setting-field">
+              <span>장난기</span>
+              <select id="playfulnessSetting">
+                <option value="low">낮게</option>
+                <option value="medium">적당히</option>
+                <option value="high">많이</option>
+              </select>
+            </label>
+            <label class="setting-field">
+              <span>질투 표현</span>
+              <select id="jealousySetting">
+                <option value="low">약하게</option>
+                <option value="medium">적당히</option>
+                <option value="high">조금 강하게</option>
+              </select>
+            </label>
+            <label class="setting-field">
+              <span>서운함 표현</span>
+              <select id="sulkinessSetting">
+                <option value="low">약하게</option>
+                <option value="medium">적당히</option>
+                <option value="high">조금 강하게</option>
+              </select>
+            </label>
+            <label class="setting-field">
+              <span>답장 길이</span>
+              <select id="replyLengthSetting">
+                <option value="short">짧게</option>
+                <option value="medium">보통</option>
+                <option value="long">조금 길게</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
         <p class="sheet-hint">대화가 쌓일수록 J와의 거리감이 자연스럽게 가까워져.</p>
       </div>
     </section>
 
-    <script src="./app.js?v=8"></script>
+    <script src="./app.js?v=9"></script>
   </body>
 </html>
