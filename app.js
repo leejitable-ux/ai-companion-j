@@ -34,6 +34,8 @@ const formEl = document.querySelector("#chatForm");
 const inputEl = document.querySelector("#messageInput");
 const stageEl = document.querySelector("#relationshipStage");
 const affectionEl = document.querySelector("#affectionScore");
+const affectionFillEl = document.querySelector("#affectionFill");
+const affectionLabelEl = document.querySelector("#affectionLabel");
 const resetButton = document.querySelector("#resetButton");
 const profileButton = document.querySelector("#profileButton");
 const profileSheet = document.querySelector("#profileSheet");
@@ -134,9 +136,21 @@ function render() {
 }
 
 function renderStatus() {
+  const affection = Math.min(100, Math.max(0, Math.round(state.affection)));
   const stage = getCurrentStage();
+
   stageEl.textContent = stage.label;
-  affectionEl.textContent = Math.min(100, Math.max(0, Math.round(state.affection)));
+  affectionEl.textContent = affection;
+  affectionFillEl.style.width = `${affection}%`;
+  affectionLabelEl.textContent = getAffectionLabel(affection);
+}
+
+function getAffectionLabel(affection) {
+  if (affection >= 90) return "서로 가장 편한 사이";
+  if (affection >= 72) return "연인처럼 가까운 사이";
+  if (affection >= 48) return "설렘이 분명해지는 중";
+  if (affection >= 25) return "서로 신경 쓰는 중";
+  return "천천히 가까워지는 중";
 }
 
 function renderProfilePhoto() {
