@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="J" />
     <title>J - AI Companion</title>
-    <link rel="manifest" href="./manifest.json?v=16" />
-    <link rel="stylesheet" href="./styles.css?v=16" />
-    <link rel="stylesheet" href="./settings.css?v=16" />
+    <link rel="manifest" href="./manifest.json?v=17" />
+    <link rel="stylesheet" href="./styles.css?v=17" />
+    <link rel="stylesheet" href="./settings.css?v=17" />
   </head>
   <body>
     <section class="launch-screen" id="launchScreen" aria-label="J 시작 화면">
@@ -18,7 +18,17 @@
       <p>J</p>
     </section>
 
-    <main class="app-shell">
+    <section class="onboarding" id="onboarding" aria-label="J 시작 상황 선택" hidden>
+      <div class="onboarding-card">
+        <div class="onboarding-logo">J</div>
+        <p class="onboarding-kicker">처음 만나는 순간</p>
+        <h1>J와 어떤 사이로 시작할까?</h1>
+        <p class="onboarding-copy">선택한 상황에 따라 첫 대화의 거리감과 친밀도가 달라져.</p>
+        <div class="scenario-list" id="scenarioList"></div>
+      </div>
+    </section>
+
+    <main class="app-shell" id="appShell">
       <section class="chat-card" aria-label="J와의 채팅">
         <header class="chat-header">
           <button class="profile-trigger" id="profileButton" type="button" aria-label="J 프로필 보기">
@@ -139,6 +149,6 @@
       </div>
     </section>
 
-    <script src="./app.js?v=16"></script>
+    <script src="./app.js?v=17"></script>
   </body>
 </html>
