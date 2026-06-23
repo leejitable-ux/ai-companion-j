@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="J" />
     <title>J - AI Companion</title>
-    <link rel="manifest" href="./manifest.json?v=17" />
-    <link rel="stylesheet" href="./styles.css?v=17" />
-    <link rel="stylesheet" href="./settings.css?v=17" />
+    <link rel="manifest" href="./manifest.json?v=18" />
+    <link rel="stylesheet" href="./styles.css?v=18" />
+    <link rel="stylesheet" href="./settings.css?v=18" />
   </head>
   <body>
     <section class="launch-screen" id="launchScreen" aria-label="J 시작 화면">
@@ -94,6 +94,23 @@
           <h3>대화 설정</h3>
           <div class="setting-grid">
             <label class="setting-field">
+              <span>나이대</span>
+              <select id="ageRangeSetting">
+                <option value="early20s">20대 초반</option>
+                <option value="mid20s">20대 중반</option>
+                <option value="late20s">20대 후반</option>
+                <option value="early30s">30대 초반</option>
+              </select>
+            </label>
+            <label class="setting-field">
+              <span>나와의 나이 관계</span>
+              <select id="ageRelationSetting">
+                <option value="same">동갑 느낌</option>
+                <option value="younger">J가 연하</option>
+                <option value="older">J가 연상</option>
+              </select>
+            </label>
+            <label class="setting-field">
               <span>말투</span>
               <select id="toneSetting">
                 <option value="warm">다정하게</option>
@@ -149,6 +166,6 @@
       </div>
     </section>
 
-    <script src="./app.js?v=17"></script>
+    <script src="./app.js?v=18"></script>
   </body>
 </html>
