@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="J" />
     <title>J - AI Companion</title>
-    <link rel="manifest" href="./manifest.json?v=13" />
-    <link rel="stylesheet" href="./styles.css?v=13" />
-    <link rel="stylesheet" href="./settings.css?v=13" />
+    <link rel="manifest" href="./manifest.json?v=14" />
+    <link rel="stylesheet" href="./styles.css?v=14" />
+    <link rel="stylesheet" href="./settings.css?v=14" />
   </head>
   <body>
     <section class="launch-screen" id="launchScreen" aria-label="J 시작 화면">
@@ -124,6 +124,14 @@
                 <option value="long">조금 길게</option>
               </select>
             </label>
+            <label class="setting-field memo-field">
+              <span>말투 메모</span>
+              <textarea
+                id="styleMemoSetting"
+                rows="6"
+                placeholder="J가 참고했으면 하는 말투나 예시를 적어줘. 예: 너무 설명하지 않기, 짧게 반응하기, 장난칠 땐 '아 진짜 ㅋㅋ'처럼 말하기"
+              ></textarea>
+            </label>
           </div>
         </section>
 
@@ -131,6 +139,6 @@
       </div>
     </section>
 
-    <script src="./app.js?v=13"></script>
+    <script src="./app.js?v=14"></script>
   </body>
 </html>
