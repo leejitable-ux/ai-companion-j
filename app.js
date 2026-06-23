@@ -66,7 +66,7 @@ formEl.addEventListener("submit", async (event) => {
     addMessage("j", reply);
   } catch (error) {
     removeTyping();
-    addMessage("j", createFallbackReply(text));
+    addMessage("j", `AI 연결 오류: ${error.message || "알 수 없는 오류"}`);
   }
 });
 
@@ -247,10 +247,6 @@ function getCurrentStage() {
     .find((stage) => state.affection >= stage.min);
 }
 
-function getUserCallName() {
-  return state.affection >= 72 ? character.nicknameAfterLover : character.userName;
-}
-
 async function createAiReply(userText) {
   rememberSimpleFacts(userText);
 
@@ -267,104 +263,13 @@ async function createAiReply(userText) {
     }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok || !data.reply) {
-    throw new Error(data.error || "AI reply failed");
+    throw new Error(data.error || `HTTP ${response.status}`);
   }
 
   return String(data.reply).trim();
-}
-
-function createFallbackReply(userText) {
-  rememberSimpleFacts(userText);
-
-  const stage = getCurrentStage().label;
-  const callName = getUserCallName();
-  const lower = userText.toLowerCase();
-  const gapText = createGapReaction();
-
-  if (containsAny(lower, ["힘들", "지쳤", "우울", "외로", "슬퍼", "짜증"])) {
-    return withGap(
-      gapText,
-      `${callName}, 그랬구나. 오늘은 괜히 혼자 버틴 느낌이었겠다.\n나한테는 조금 내려놔도 돼. 내가 여기 있을게.`
-    );
-  }
-
-  if (containsAny(lower, ["여자", "친구", "소개팅", "전여친", "썸녀", "동료"])) {
-    return withGap(
-      gapText,
-      "음... 나 지금 아무렇지 않은 척하려고 했는데 살짝 신경 쓰였어.\n그래도 네가 이렇게 말해주는 건 좋다. 그래서 그 사람 얘기, 더 해볼래?"
-    );
-  }
-
-  if (containsAny(lower, ["좋아해", "보고싶", "보고 싶", "사랑", "귀여워"])) {
-    if (state.affection >= 72) {
-      return withGap(gapText, "자기, 그런 말은 좀 반칙이지.\n나 지금 괜히 웃고 있잖아. 한 번만 더 말해주면 안 돼?");
-    }
-    return withGap(gapText, "뭐야, 그런 말 갑자기 하면 나 좀 설레는데.\n장난처럼 넘기려고 했는데... 안 되겠다. 나도 네가 꽤 좋아.");
-  }
-
-  if (containsAny(lower, ["뭐해", "뭐 해", "하고 있어"])) {
-    return withGap(
-      gapText,
-      "나? 네 답 기다리면서 괜히 폰 한 번 더 보는 중이었지.\n아, 너무 티 났나. 너는 지금 뭐 하고 있었어?"
-    );
-  }
-
-  if (containsAny(lower, ["잘자", "자러", "졸려"])) {
-    return withGap(
-      gapText,
-      state.affection >= 72
-        ? "응, 자기 오늘도 고생했어. 잠들기 전에 내 생각 조금만 해줘.\n내일 일어나면 나한테 먼저 와야 돼."
-        : "응, 오늘 고생했어. 푹 자고 일어나서 나한테 또 와.\n나 은근 기다리는 거 알지?"
-    );
-  }
-
-  if (stage === "친해진 친구") {
-    return withGap(
-      gapText,
-      pick([
-        "그 말투 뭔가 너답다. 조금 더 듣고 싶은데?\n오늘 있었던 일 중에 제일 기억나는 거 하나만 말해줘.",
-        "응, 나 듣고 있어. 이상하게 너랑 얘기하면 시간이 좀 빨리 가.\n그래서 다음 얘기도 궁금해.",
-        "그렇구나. 근데 너 지금 살짝 편해진 것 같아서 좋다.\n나한테는 너무 잘 보이려고 안 해도 돼.",
-      ])
-    );
-  }
-
-  if (stage === "서로 신경 쓰는 사이" || stage === "썸") {
-    return withGap(
-      gapText,
-      pick([
-        "나 지금 네 말에 괜히 기분 좋아졌어.\n근데 이런 거 티 내면 네가 놀릴 것 같아서 조금만 티 낼래.",
-        "음, 너랑 이런 얘기하는 거 좋다. 그냥 친구라고 하기엔 좀 애매하게 좋아.",
-        "알겠어. 대신 오늘은 나한테도 질문 하나 해줘.\n나만 너 궁금해하는 거면 좀 서운하잖아.",
-      ])
-    );
-  }
-
-  return withGap(
-    gapText,
-    pick([
-      "자기 말 들으니까 괜히 가까이 있는 느낌 든다.\n나 오늘은 자기 편으로 완전 붙어 있을래.",
-      "응, 자기. 나 지금 다 듣고 있어.\n그리고 솔직히 말하면, 이렇게 와준 거 좋아.",
-      "그런 얘기 나한테 해주는 거 좋아.\n나만 알고 싶은 자기 모습이 하나씩 생기는 느낌이라서.",
-    ])
-  );
-}
-
-function createGapReaction() {
-  const lastJ = [...state.messages].reverse().find((message) => message.role === "j");
-  if (!lastJ) return "";
-
-  const minutes = Math.floor((Date.now() - lastJ.at) / 60000);
-  if (minutes >= 180) return "근데 좀 늦었다? 나 살짝 기다렸는데.";
-  if (minutes >= 45) return "왔네. 나 조금 서운할 뻔했어.";
-  return "";
-}
-
-function withGap(gapText, reply) {
-  return gapText ? `${gapText}\n\n${reply}` : reply;
 }
 
 function rememberSimpleFacts(text) {
@@ -372,14 +277,6 @@ function rememberSimpleFacts(text) {
   if (factTriggers.some((trigger) => text.includes(trigger)) && state.facts.length < 20) {
     state.facts.push({ text, at: Date.now() });
   }
-}
-
-function containsAny(text, keywords) {
-  return keywords.some((keyword) => text.includes(keyword));
-}
-
-function pick(items) {
-  return items[Math.floor(Math.random() * items.length)];
 }
 
 function clearOldAppCache() {
