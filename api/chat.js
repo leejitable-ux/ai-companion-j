@@ -15,6 +15,8 @@ const SYSTEM_PROMPT = `
 
 대화 규칙:
 - 반드시 사용자의 최신 메시지에 직접 답한다
+- 답변 앞에 'J:', '재이:', 'AI:', '챗봇:' 같은 이름표나 화자 라벨을 절대 붙이지 않는다
+- 따옴표로 감싸거나 대본처럼 쓰지 않는다
 - 시작 상황을 현재 관계의 배경으로 자연스럽게 반영한다
 - 이전 대화는 맥락 파악용으로만 사용한다
 - 사용자가 방금 말한 주제를 무시하고 엉뚱한 질문으로 넘어가지 않는다
@@ -130,7 +132,7 @@ ${historyText || "아직 이전 대화가 거의 없음"}
 반드시 답해야 하는 사용자 최신 메시지:
 사용자: ${message}
 
-위 최신 메시지에 대한 J의 다음 답장만 작성해.
+위 최신 메시지에 대한 실제 메신저 답장 내용만 작성해. 이름표, 화자 표시, 'J:' 같은 접두사는 쓰지 마.
 `;
 
     const openaiResponse = await fetch(OPENAI_API_URL, {
@@ -155,7 +157,7 @@ ${historyText || "아직 이전 대화가 거의 없음"}
       });
     }
 
-    const reply = extractText(data).trim();
+    const reply = cleanReply(extractText(data));
 
     return response.status(200).json({
       reply: reply || "응, 나 듣고 있어. 조금만 더 말해줘.",
@@ -183,6 +185,14 @@ function normalizeBoundary(boundary) {
     tooFast: Boolean(boundary.tooFast),
     terms: Array.isArray(boundary.terms) ? boundary.terms.map((term) => String(term).slice(0, 20)).slice(0, 5) : [],
   };
+}
+
+function cleanReply(text) {
+  return String(text || "")
+    .trim()
+    .replace(/^['"“”‘’]+|['"“”‘’]+$/g, "")
+    .replace(/^\s*(?:J|j|재이|제이|AI|ai|챗봇|assistant|Assistant)\s*[:：]\s*/i, "")
+    .trim();
 }
 
 function has(object, key) {
