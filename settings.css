@@ -48,7 +48,7 @@
 }
 
 .setting-field textarea {
-  min-height: 116px;
+  min-height: 132px;
   resize: vertical;
   line-height: 1.55;
   padding: 11px 12px;
@@ -68,8 +68,37 @@
   grid-column: 1 / -1;
 }
 
+.file-import-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.file-import-button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(74, 174, 232, 0.35);
+  border-radius: 999px;
+  background: var(--skin-primary-soft);
+  color: var(--skin-primary-strong);
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 820;
+  cursor: pointer;
+}
+
+.file-import-status {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-faint) !important;
+  font-size: 11px !important;
+  font-weight: 680 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .launch-mark {
-  background: url("./icon.svg?v=18") center / cover no-repeat !important;
+  background: url("./icon.svg?v=19") center / cover no-repeat !important;
   color: transparent !important;
   border-radius: 29px !important;
   box-shadow: 0 24px 55px rgba(46, 142, 219, 0.26), 0 10px 22px rgba(80, 174, 232, 0.18) !important;
