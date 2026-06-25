@@ -1,7 +1,7 @@
 const STORAGE_KEY = "ai-companion-j-v1";
 const PHOTO_STORAGE_KEY = "ai-companion-j-profile-photo";
 const SETTINGS_STORAGE_KEY = "ai-companion-j-settings";
-const STYLE_REFERENCE_LIMIT = 8000;
+const STYLE_REFERENCE_LIMIT = 20000;
 
 const defaultSettings = {
   ageRange: "mid20s",
@@ -101,6 +101,8 @@ const jealousySetting = document.querySelector("#jealousySetting");
 const sulkinessSetting = document.querySelector("#sulkinessSetting");
 const replyLengthSetting = document.querySelector("#replyLengthSetting");
 const styleMemoSetting = document.querySelector("#styleMemoSetting");
+const styleFileInput = document.querySelector("#styleFileInput");
+const styleFileStatus = document.querySelector("#styleFileStatus");
 
 renderScenarioChoices();
 renderAppMode();
@@ -150,6 +152,8 @@ photoInput.addEventListener("change", (event) => {
   });
   reader.readAsDataURL(file);
 });
+
+styleFileInput.addEventListener("change", importStyleReferenceFile);
 
 [
   ageRangeSetting,
@@ -233,6 +237,54 @@ async function handleSubmit(event) {
     removeTyping();
     addMessage("j", `AI 연결 오류: ${error.message || "알 수 없는 오류"}`);
   }
+}
+
+function importStyleReferenceFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  if (styleFileStatus) styleFileStatus.textContent = "파일 읽는 중...";
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    const rawText = String(reader.result || "");
+    const sampledText = compactStyleReference(rawText);
+    styleMemoSetting.value = sampledText;
+    saveSettingsFromForm();
+
+    const rawLength = rawText.length.toLocaleString("ko-KR");
+    const savedLength = sampledText.length.toLocaleString("ko-KR");
+    if (styleFileStatus) styleFileStatus.textContent = `${file.name} · ${rawLength}자 중 ${savedLength}자 반영`;
+  });
+  reader.addEventListener("error", () => {
+    if (styleFileStatus) styleFileStatus.textContent = "파일을 읽지 못했어";
+  });
+  reader.readAsText(file, "utf-8");
+}
+
+function compactStyleReference(text) {
+  const normalized = text
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  if (normalized.length <= STYLE_REFERENCE_LIMIT) return normalized;
+
+  const partLength = Math.floor((STYLE_REFERENCE_LIMIT - 220) / 3);
+  const head = normalized.slice(0, partLength);
+  const middleStart = Math.max(0, Math.floor(normalized.length / 2 - partLength / 2));
+  const middle = normalized.slice(middleStart, middleStart + partLength);
+  const tail = normalized.slice(-partLength);
+
+  return [
+    "[카카오톡 대화 원문 일부: 파일이 길어서 앞/중간/뒤 구간을 균형 있게 반영함]",
+    "\n--- 앞부분 ---\n",
+    head,
+    "\n--- 중간부분 ---\n",
+    middle,
+    "\n--- 뒷부분 ---\n",
+    tail,
+  ].join("").slice(0, STYLE_REFERENCE_LIMIT);
 }
 
 function createUnstartedState() {
@@ -328,6 +380,7 @@ function renderSettings() {
   sulkinessSetting.value = settings.sulkiness;
   replyLengthSetting.value = settings.replyLength;
   styleMemoSetting.value = settings.styleMemo || "";
+  if (styleFileStatus && settings.styleMemo) styleFileStatus.textContent = `${settings.styleMemo.length.toLocaleString("ko-KR")}자 저장됨`;
 }
 
 function render() {
