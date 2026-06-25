@@ -8,9 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="J" />
     <title>J - AI Companion</title>
-    <link rel="manifest" href="./manifest.json?v=18" />
-    <link rel="stylesheet" href="./styles.css?v=18" />
-    <link rel="stylesheet" href="./settings.css?v=18" />
+    <link rel="manifest" href="./manifest.json?v=19" />
+    <link rel="stylesheet" href="./styles.css?v=19" />
+    <link rel="stylesheet" href="./settings.css?v=19" />
   </head>
   <body>
     <section class="launch-screen" id="launchScreen" aria-label="J 시작 화면">
@@ -151,14 +151,19 @@
                 <option value="long">조금 길게</option>
               </select>
             </label>
-            <label class="setting-field memo-field">
+            <div class="setting-field memo-field">
               <span>대화 기록/말투 자료</span>
+              <div class="file-import-row">
+                <label class="file-import-button" for="styleFileInput">TXT 파일 불러오기</label>
+                <span class="file-import-status" id="styleFileStatus">선택된 파일 없음</span>
+              </div>
+              <input class="sr-only" id="styleFileInput" type="file" accept=".txt,text/plain" />
               <textarea
                 id="styleMemoSetting"
                 rows="6"
-                placeholder="예전 대화나 닮았으면 하는 말투를 그대로 붙여넣어도 돼. J는 내용을 외우기보다 말투, 호흡, 반응 방식을 참고해."
+                placeholder="카카오톡 대화 내보내기 TXT를 불러오거나, 예전 대화/닮았으면 하는 말투를 붙여넣어줘."
               ></textarea>
-            </label>
+            </div>
           </div>
         </section>
 
@@ -166,6 +171,6 @@
       </div>
     </section>
 
-    <script src="./app.js?v=18"></script>
+    <script src="./app.js?v=19"></script>
   </body>
 </html>
